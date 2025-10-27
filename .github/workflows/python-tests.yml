@@ -2,9 +2,10 @@ name: Selenium Pytest CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master", "feature/**" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
+  workflow_dispatch: {}
 
 jobs:
   test:
@@ -12,12 +13,20 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip"
+
+      # Instala Google Chrome en el runner
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Show Chrome version
+        run: chrome --version
 
       - name: Install dependencies
         run: |
@@ -28,11 +37,12 @@ jobs:
       - name: Run Selenium tests (headless)
         run: pytest -v --html=reports/report.html --self-contained-html
 
+      # Sube el reporte aunque fallen los tests
       - name: Upload test report
-        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
         with:
           name: pytest-report
           path: reports/report.html
-          
-      - name: Run API tests
-        run: pytest -v -s tests/test_api_public.py tests/test_api_mock.py
+          if-no-files-found: error
+          retention-days: 7
