@@ -39,6 +39,12 @@ pytest --html=reports/report.html --self-contained-html
 ### Pruebas específicas
 pytest tests/test_login.py::test_login_exitoso -v
 
+### Pruebas en API específicas
+pytest -v -s
+
+### Pruebas usando Mocks específicas
+pytest -v -s tests/test_api_public.py 
+
 # Integración continua (CI/CD)
 # El pipeline de GitHub Actions se ejecuta automáticamente en cada push o pull request.
 
